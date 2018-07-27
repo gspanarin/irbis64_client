@@ -1,5 +1,6 @@
 import socket
 import random
+import configparser
 
 class irbis64():
     """
@@ -8,6 +9,9 @@ class irbis64():
     proc_id = random.randint(11111111,99999999)
     command_num = 1
     debug = False
+    ini = configparser.ConfigParser()
+    error = ''
+    
     def __init__(self,
                  host = '127.0.0.1',
                  port = 5555,
@@ -47,6 +51,11 @@ class irbis64():
         answer = answer.decode('cp1251')
         answer = answer.split("\r\n")
         status = answer[10]
+        if int(status) == 0:
+            tmp = '\n'.join(answer[12:])
+            self.ini.read_string(tmp)
+        else:
+            self.error = 'REG_ERROR: ' + status
         return str(status)
 
 
@@ -157,12 +166,17 @@ class irbis64():
                 
         return {'status' : status, 'count' : count, 'result' : result}
 
+
+
+
+    ##################################
+    #  Функция чтения записи по заданной базе и МФН
+    ##################################
     def read_record(self,
                     db_name,
                     mfn,
                     lock = 0):
         """
-        Функция чтения записи по заданной базе и МФН
 """
         paramlist = ('C',
                      self.arm,
@@ -208,9 +222,14 @@ class irbis64():
         else:
             return {'error' :'status = ' + status}
 
+
+
+
+    ##################################
+    #  Функция сохранения записи в базу САБ ИРБИС64
+    ##################################
     def save_record(self, db_name, rec, Lock = 0, IfUpdate = 1):
         """
-    Функция сохранения записи в базу САБ ИРБИС64
     Db_name – имя БД
     Lock – блокировать ли запись. 1 – блокировать, 0 – не блокировать.
     IfUpdate – актуализировать ли запись. 1 – актуализировать, 0 – не актуализировать
@@ -249,6 +268,8 @@ class irbis64():
             return -1 #ошибка
 
 
+
+
 class irbis64_rec():
     """
     Класс ЗАПИСЬ САБ ИРБИС64
@@ -264,9 +285,21 @@ class irbis64_rec():
         self.version = version
         self.fields = fields
 
+    ##################################
+    #  Функция добавления поля в запись
+    ##################################
     def add_field(self,fieldnum,fieldval):
         self.fields.append({'fieldnum' : fieldnum, 'fieldval' : fieldval})
 
+    ##################################
+    #  Функция добавления поля в запись
+    ##################################
+    def clear_field(self):
+        self.fields.clear()
+
+    ##################################
+    #  Функция вывода информации о записи
+    ##################################
     def rec_info(self):
         s = 'mfn = ' + str(self.mfn) + '\n'
         s += 'status = ' + str(self.status) + '\n'

@@ -1,5 +1,8 @@
 from irbis64_class import irbis64, irbis64_rec
 
+##################################
+# Пример функции поиска записей в базе
+##################################
 def search_record(irbis):
     retval = irbis.search('ibis','HD=$',10,1,'@brief')
     if int(retval["status"]) == 0:
@@ -11,12 +14,17 @@ def search_record(irbis):
     else:
         print('error')
 
+##################################
+# Пример функции чтения записи по заданному номеру MFN
+##################################
 def read_record(irbis):
     retval = irbis.read_record('ibis',1)
     print(retval)
          
 
-
+##################################
+# Пример функции создания записи и сохранения ее в базу
+##################################
 def creat_and_save_record(irbis):
     rec = irbis64_rec()
     rec.add_field(920,'PAZK')
@@ -34,6 +42,8 @@ def creat_and_save_record(irbis):
         print('OK')
     else:
         print('ERROR')
+
+
     
 irbis = irbis64()
 irbis.host = '127.0.0.1'
@@ -51,6 +61,8 @@ irbis.reg()
 #read_record(irbis)
 #Создание новой записи и сохранение ее в базу данных
 #creat_and_save_record(irbis)
+#Чтение параметров ини-файла АРМа пользователя
+#print(irbis.ini.get('MAIN', 'DBNNAMECAT'))
 
 #разрегистрация на сервере САБ ИРБИС64
 irbis.unreg()
